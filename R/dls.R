@@ -1,21 +1,3 @@
-#' A Cat Function
-#'
-#' This function allows you to express your love of cats.
-#' @param love Do you love cats? Defaults to TRUE.
-#' @keywords cats
-#' @export
-#' @examples
-#' cat_function()
-
-cat_function <- function(love=TRUE){
-  if(love==TRUE){
-    print("I love cats!")
-  }
-  else {
-    print("I am not a cool person.")
-  }
-}
-
 #--Function for updating lambda used in selection
 #n = number of observation; p = number of independent variables; se = standard error of residual or dependent variable
 updateLambda <- function(n, p, se) {se * (1.1 / sqrt(n)) * qnorm(1 - (.1 / log(n)) / (2 * p))}
@@ -38,7 +20,7 @@ acquireBetaIndices <- function(df_x, y, lambda, n, p) {
   }
 
   #Return the variable indices with absolute value of beta > 0
-  return(which(abs(beta) > 0))
+  return(Matrix::which(abs(beta) > 0))
 }
 
 
@@ -124,6 +106,29 @@ expandDt <- function(outcome, treatment, test, DT) {
   output[, -1] #-1 to remove the intersection term created by matrix
 }
 
+
+
+
+#' A Cat Function
+#'
+#' This function allows you to express your love of cats.
+#' @param df Do you love cats? Defaults to TRUE.
+#' @param outcome gg
+#' @param treatment sss
+#' @param test sss
+#' @keywords cats
+#' @return gggg
+#' @export
+#' @examples
+#' data(mtcars)
+#' outcome <- "mpg"
+#' treatment <- ""
+#' test <- ""
+#' DT_select <- doubleLassoSelect(df=mtcars, outcome=outcome, treatment=treatment, test=test)
+#'
+#' #Result
+#' model_lm <- lm(as.formula(sprintf("`%s` ~ .", outcome)), data=DT_select)
+#' summary(model_lm)
 doubleLassoSelect <- function(df, outcome, treatment, test) {
   #Deal with all var as test
   if(test == "") test <- names(df)[!(names(df) %in% union(outcome, treatment))]
@@ -133,16 +138,3 @@ doubleLassoSelect <- function(df, outcome, treatment, test) {
 }
 
 
-library(glmnet)
-library(data.table)
-library(purrr)
-data(mtcars)
-head(mtcars, 6)
-outcome <- "mpg"
-treatment <- ""
-test <- ""
-
-DT_select <- doubleLassoSelect(df=mtcars, outcome=outcome, treatment=treatment, test=test)
-model_lm <- lm(as.formula(sprintf("`%s` ~ .", outcome)), data=DT_select)
-
-summary(model_lm)
