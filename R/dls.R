@@ -5,13 +5,13 @@ updateLambda <- function(n, p, se) {se * (1.1 / sqrt(n)) * qnorm(1 - (.1 / log(n
 
 #--Function for acquiring the indices of the selected variables in df_x
 #df_x = matrix with only variables to be tested; y = dependent variable or treatment variables; lambda = the initial lambda computed in advance
-acquireBetaIndices <- function(df_x, y, lambda, n, p) {
+acquireBetaIndices <- function(df_x, y, lambda, n, p, tk) {
   #glmnet accept only matrix not df
   df_x <- as.matrix(df_x)
 
   #Update lambda k times, k is selected based on literature
   k <- 1
-  while(k < 15) {
+  while(k <= tk) {
     model_las <- glmnet(x=df_x, y=y, alpha=1, lambda=lambda, standardize=TRUE)
     beta <- coef(model_las)
     residual.se <- sd(y - predict(model_las, df_x))
@@ -26,7 +26,7 @@ acquireBetaIndices <- function(df_x, y, lambda, n, p) {
 
 #--Function to perform double lasso selection
 #output = a new df with variables selected
-mainOperation <- function(df, outcome, treatment, test) {
+mainOperation <- function(df, outcome, treatment, test, k) {
   #--Setting up
   #Produce necessary data structures
   ytreatment <- union(outcome, treatment[treatment != ""])
@@ -48,7 +48,7 @@ mainOperation <- function(df, outcome, treatment, test) {
   lambda <- updateLambda(n=n, p=p, se=residual.se)
 
   #by Lasso model: dependent variable ~ test variables
-  betaIndices <- acquireBetaIndices(df_x=df_test, y=c_outcome, lambda=lambda, n=n, p=p)
+  betaIndices <- acquireBetaIndices(df_x=df_test, y=c_outcome, lambda=lambda, n=n, p=p, tk=k)
 
 
   #--Select vars that predict treatments
@@ -64,7 +64,7 @@ mainOperation <- function(df, outcome, treatment, test) {
       lambda <- updateLambda(n=n, p=p, se=c_treatment.se)
 
       #Acquire the indices and union the result indices of each treatment variable
-      betaIndices <- union(betaIndices, acquireBetaIndices(df_x=df_test, y=c_treatment, lambda=lambda, n=n, p=p))
+      betaIndices <- union(betaIndices, acquireBetaIndices(df_x=df_test, y=c_treatment, lambda=lambda, n=n, p=p, tk=k))
     }
   }
 
@@ -109,32 +109,56 @@ expandDt <- function(outcome, treatment, test, DT) {
 
 
 
-#' A Cat Function
+#' A function implements the Double Lasso Selection
 #'
-#' This function allows you to express your love of cats.
-#' @param df Do you love cats? Defaults to TRUE.
-#' @param outcome gg
-#' @param treatment sss
-#' @param test sss
-#' @keywords cats
-#' @return gggg
+#' This function implements Double Lasso Selection on a specified data frame, with specified treatment variables to be included in the final model and covariates to be tested via the selection process.
+#' @param df Accepts \code{data.frame} and \code{data.table}. The data frame must contain all the variables specified in \code{outcome}, \code{treatment}, and \code{test}.
+#' @param outcome Accepts single \code{character} value. It cannot be an empty character. The character specifies the outcome variable's name, which will be searched in the column names of provided data frame.
+#' @param treatment
+#'   Accepts single \code{character} value or a \code{character vector}. It specifies the treatment variable's name(s), which will be searched in the column names of provided data frame.
+#'   The treatment variables are those variables will NOT go through the selection and will be included in the final output data set.
+#'   This parameter accepts empty \code{character}, which implies no treatment variable to be included in the process.
+#' @param test
+#'   Accepts single empty \code{character} or a \code{character vector} with a length >= 2 (restricted by the \code{glmet} package). It specifies the test variable's name(s), which will be searched in the column names of provided data frame.
+#'   The test variables are those covariates will go through the selection and may or may not be included in the final data set.
+#'   This parameter accepts empty \code{character}, which implies performing selection on all variables except for the outcome and treatment variables.
+#' @param k
+#'   Accepts a \code{numeric} value. This is the number of times \code{lambda} being updated. The \code{lambda} here is a parameter used in lasso regression to represent the degree of regularization.
+#'   You do not have to adjust this value in most situations. The default value is suggested by the paper specified in the package reference.
+#' @return This function returns a data frame (\code{data.table}) with selected variables.
+#' @keywords double lasso variable selection
 #' @export
 #' @examples
+#' #Fetch data for demonstration
 #' data(mtcars)
+#'
+#' #Input example 1:
+#' #Character vectors as `treatment` and `test` input with an interaction term
+#' outcome <- "mpg"
+#' treatment <- c("cyl", "hp")
+#' test <- c("drat", "disp", "vs", "cyl:hp")
+#'
+#' #Input example 2:
+#' #Empty character as `treatment` and `test` input
 #' outcome <- "mpg"
 #' treatment <- ""
 #' test <- ""
+#'
+#' #Acquire the selected data frame
 #' DT_select <- doubleLassoSelect(df=mtcars, outcome=outcome, treatment=treatment, test=test)
 #'
-#' #Result
+#' #Implement a linear model after the selection
 #' model_lm <- lm(as.formula(sprintf("`%s` ~ .", outcome)), data=DT_select)
 #' summary(model_lm)
-doubleLassoSelect <- function(df, outcome, treatment, test) {
+#'
+doubleLassoSelect <- function(df, outcome, treatment, test, k=15) {
   #Deal with all var as test
   if(test == "") test <- names(df)[!(names(df) %in% union(outcome, treatment))]
 
+  #Expand the data frame for interaction terms and processes variable names
   DT <- expandDt(outcome, treatment, test, as.data.table(df))
-  DT_select <- mainOperation(df=DT, outcome=outcome, treatment=treatment, test=test)
+
+  #Perform selection and return
+  DT_select <- mainOperation(df=DT, outcome=outcome, treatment=treatment, test=test, k=k)
+  return(DT_select)
 }
-
-

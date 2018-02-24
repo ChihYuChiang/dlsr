@@ -1,9 +1,17 @@
 Package: dlsr
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-Depends: R (>= 3.4.3)
-License: MIT License
+Title: Double Lasso Selection
+Version: 0.0.0.001
+Authors@R: person("Chih-Yu", "Chiang", email = "chihyuchiang@uchicago.edu", role = c("aut", "cre"))
+Description:
+  The \code{doubleLassoSelect} function is an alternative implementation of Double Lasso Selection on OLS. This implementation is based primarily on package \code{glmet} and a paper of O. Urminsky, C. Hansen, and V. Chernozhukov (working draft), as listed in the reference.\cr\cr
+  For original implementation, please see \code{hdm} package by Chernozhukov, Hansen, and Spindler.
+  About the mathematical details of the method, please refer to the original papers listed in the reference section.
+Depends:
+  R (>= 3.2.5),
+  data.table,
+  glmnet,
+  purrr,
+  Matrix
+License: Unlimited
 Encoding: UTF-8
-LazyData: true
+RoxygenNote: 6.0.1
