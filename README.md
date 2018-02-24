@@ -42,7 +42,6 @@ outcome | Accepts single `character` value. It cannot be an empty `character`. T
 treatment | Accepts single `character` value or a `character vector`. It specifies the treatment variable's name(s), which will be searched in the column names of provided data frame. The treatment variables are those variables will NOT go through the selection and will be included in the final output data set. This parameter accepts empty `character`, which implies no treatment variable to be included in the process.
 test | Accepts single empty `character` or a `character vector` with a length >= 2 (restricted by the `glmet` package). It specifies the test variable's name(s), which will be searched in the column names of provided data frame. The test variables are those covariates will go through the selection and may or may not be included in the final data set. This parameter accepts empty character, which implies performing selection on all variables except for the outcome and treatment variables.
 k | Accepts a `numeric` value. This is the number of times `lambda` being updated. The `lambda` here is a parameter used in lasso regression to represent the degree of regularization. You do not have to adjust this value in most situations. The default value is suggested by the paper specified in the package reference.
--------
 
 ### Value
 This function returns a data frame (`data.table`) with selected variables.
