@@ -25,3 +25,49 @@ Maintainer: Chih-Yu Chiang chihyuchiang@uchicago.edu
 install.packages("devtools")  
 devtools::install_github("ChihYuChiang/dlsr")
 ```
+
+## Functions
+```
+doubleLassoSelect(df, outcome, treatment, test, k=15)
+```
+
+### Description
+This function implements Double Lasso Selection on a specified data frame, with specified treatment variables to be included in the final model and covariates to be tested via the selection process.
+
+### Arguments
+Argument | Description
+------- | ------
+df | Accepts `data.frame` and `data.table`. The data frame must contain all the variables specified in outcome, treatment, and test.
+outcome | Accepts single `character` value. It cannot be an empty `character`. The character specifies the outcome variable's name, which will be searched in the column names of provided data frame.
+treatment | Accepts single `character` value or a `character vector`. It specifies the treatment variable's name(s), which will be searched in the column names of provided data frame. The treatment variables are those variables will NOT go through the selection and will be included in the final output data set. This parameter accepts empty `character`, which implies no treatment variable to be included in the process.
+test | Accepts single empty `character` or a `character vector` with a length >= 2 (restricted by the `glmet` package). It specifies the test variable's name(s), which will be searched in the column names of provided data frame. The test variables are those covariates will go through the selection and may or may not be included in the final data set. This parameter accepts empty character, which implies performing selection on all variables except for the outcome and treatment variables.
+k | Accepts a `numeric` value. This is the number of times `lambda` being updated. The `lambda` here is a parameter used in lasso regression to represent the degree of regularization. You do not have to adjust this value in most situations. The default value is suggested by the paper specified in the package reference.
+-------
+
+### Value
+This function returns a data frame (`data.table`) with selected variables.
+
+### Examples
+```
+#Fetch data for demonstration
+data(mtcars)
+
+#Input example 1:
+#Character vectors as `treatment` and `test` input with an interaction term
+outcome <- "mpg"
+treatment <- c("cyl", "hp")
+test <- c("drat", "disp", "vs", "cyl:hp")
+
+#Input example 2:
+#Empty character as `treatment` and `test` input
+outcome <- "mpg"
+treatment <- ""
+test <- ""
+
+#Acquire the selected data frame
+DT_select <- doubleLassoSelect(df=mtcars, outcome=outcome, treatment=treatment, test=test)
+
+#Implement a linear model after the selection
+model_lm <- lm(as.formula(sprintf("`%s` ~ .", outcome)), data=DT_select)
+summary(model_lm)
+```
