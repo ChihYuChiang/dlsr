@@ -1,7 +1,7 @@
 #' @details
 #' Compared to \code{rlassoEffects} function in the original \code{hdm}, \code{doubleLassoSelect} function in \code{dlsr} provides an alternative implementation of this specific method with the following benefits:
 #' \enumerate{
-#'   \item The \code{doubleLassoSelect} function accepts character vectors as variable input, instead of matrix indice or logical vectors. This improves code readability and facilitates batch implementation with external data source such as a csv.
+#'   \item The \code{doubleLassoSelect} function accepts character vectors as variable input, instead of matrix indices or logical vectors. This improves code readability and facilitates batch implementation with external data source such as a csv.
 #'   \item It Supports interaction terms as variable input. The \code{doubleLassoSelect} handles the matrix expansion for you.
 #'   \item Instead of the result of a linear model, the \code{doubleLassoSelect} outputs a data frame (data.table) with the selected variables. This provides users more flexibility in subsequent operations, for example, applying the selected result further in a latent class model.
 #' }
