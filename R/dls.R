@@ -151,9 +151,9 @@ expandDt <- function(outcome, treatment, test, DT) {
 #' model_lm <- lm(as.formula(sprintf("`%s` ~ .", outcome)), data=DT_select)
 #' summary(model_lm)
 #'
-doubleLassoSelect <- function(df, outcome, treatment, test, k=15) {
+doubleLassoSelect <- function(df, outcome, treatment, test = NULL, k=15) {
   #Deal with all var as test
-  if(test == "") test <- names(df)[!(names(df) %in% union(outcome, treatment))]
+  if(is.null(test)) test <- names(df)[!(names(df) %in% union(outcome, treatment))]
 
   #Expand the data frame for interaction terms and processes variable names
   DT <- expandDt(outcome, treatment, test, as.data.table(df))
